@@ -7,9 +7,11 @@ replay_pid*
 
 ### Maven ###
 target/
+# Povolit Maven Wrapper
+!.mvn/
+!.mvn/wrapper/
 !.mvn/wrapper/maven-wrapper.jar
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.properties
+!.mvn/wrapper/maven-wrapper.properties
 
 ### Spring Boot ###
 *.war
@@ -34,7 +36,7 @@ out/
 .idea/**/dbnavigator.xml
 .idea/**/httpRequests/
 
-### VS Code (kdyby bylo otevřeno ve VS Code) ###
+### VS Code ###
 .vscode/
 
 ### OS files ###
