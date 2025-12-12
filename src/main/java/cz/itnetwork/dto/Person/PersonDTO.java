@@ -10,7 +10,6 @@ import lombok.*;
 @Builder
 public class PersonDTO {
 
-    @JsonProperty("_id")
     private Integer id;
 
     private String name;
