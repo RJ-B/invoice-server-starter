@@ -13,7 +13,6 @@ target/
 
 ### Spring Boot ###
 *.war
-*.jar
 *.iml
 
 ### IntelliJ IDEA ###
