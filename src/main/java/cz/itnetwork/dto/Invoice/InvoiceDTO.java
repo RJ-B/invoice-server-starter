@@ -15,14 +15,21 @@ public class InvoiceDTO {
     private Integer id;
 
     private Integer invoiceNumber;
+
     private String issued;
+
     private String dueDate;
+
     private String product;
+
     private Double price;
+
     private Double vat;
+
     private String note;
 
     private PersonReadDTO seller;
+
     private PersonReadDTO buyer;
 
     private Boolean hidden;

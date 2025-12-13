@@ -10,6 +10,8 @@ import lombok.*;
 public class PersonStatisticsDTO {
 
     private Integer personId;
+
     private String personName;
+
     private Double revenue;
 }

@@ -22,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(timingInterceptor)
-                .addPathPatterns("/api/**"); // pouze REST API
+                .addPathPatterns("/api/**");
     }
 }

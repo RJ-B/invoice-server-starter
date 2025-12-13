@@ -8,7 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class InvoiceStatisticsDTO {
+
     private Double currentYearSum;
+
     private Double allTimeSum;
+
     private Integer invoicesCount;
 }
