@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Controller zajišťující autentizační operace aplikace.
+ * Obsahuje endpointy pro registraci, přihlášení a OAuth autentizaci.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -31,8 +35,24 @@ public class AuthController {
     // ============================================
     //   1) KLASICKÁ REGISTRACE
     // ============================================
+
+    /**
+     * Registrace nového uživatele pomocí emailu a hesla.
+     *
+     * @param dto datový přenosový objekt obsahující registrační údaje uživatele
+     *            (email, heslo, jméno, příjmení, telefon)
+     * @return ResponseEntity s informací o úspěchu registrace
+     *         nebo chybovým stavem při neplatných datech či existujícím uživateli
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserAuthDTO dto) {
+
+        if (dto == null ||
+                dto.getEmail() == null || dto.getEmail().isBlank() ||
+                dto.getPassword() == null || dto.getPassword().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Neplatná vstupní data"));
+        }
 
         if (userRepository.existsByEmail(dto.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -58,8 +78,24 @@ public class AuthController {
     // ============================================
     //   2) LOGIN (email + heslo)
     // ============================================
+
+    /**
+     * Přihlášení uživatele pomocí emailu a hesla.
+     *
+     * @param dto datový přenosový objekt obsahující přihlašovací údaje
+     *            (email a heslo)
+     * @return ResponseEntity obsahující JWT token a základní údaje o uživateli
+     *         nebo chybový stav při neplatných přihlašovacích údajích
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
+
+        if (dto == null ||
+                dto.getEmail() == null || dto.getEmail().isBlank() ||
+                dto.getPassword() == null || dto.getPassword().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Neplatná vstupní data"));
+        }
 
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElse(null);
@@ -74,7 +110,7 @@ public class AuthController {
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .roles(user.getRole().name().replace("ROLE_", "")) // např. ROLE_USER → USER
+                        .roles(user.getRole().name().replace("ROLE_", ""))
                         .build();
 
         String token = jwtUtil.generateToken(userDetails);
@@ -94,34 +130,42 @@ public class AuthController {
     // ============================================
     //   3) GOOGLE LOGIN / REGISTRACE
     // ============================================
+
+    /**
+     * Přihlášení nebo registrace uživatele prostřednictvím Google OAuth 2.0.
+     *
+     * @param dto datový přenosový objekt obsahující Google ID token
+     * @return ResponseEntity s JWT tokenem a údaji o uživateli,
+     *         nebo chybový stav při neplatném Google tokenu
+     */
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginDTO dto) {
 
-        // 1) Ověření Google ID tokenu
+        if (dto == null || dto.getIdToken() == null || dto.getIdToken().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Neplatná vstupní data"));
+        }
+
         GoogleIdToken.Payload payload = googleTokenVerifier.verify(dto.getIdToken());
         if (payload == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Neplatný Google token"));
         }
 
-        // 2) Získání údajů z payloadu
-        String googleId = payload.getSubject();          // unikátní ID uživatele u Google
+        String googleId = payload.getSubject();
         String email = payload.getEmail();
         String name = (String) payload.get("name");
         String picture = (String) payload.get("picture");
 
-        // 3) Registrace nebo login uživatele
         User user = userService.registerOrLoginGoogle(googleId, email, name, picture);
 
-        // 4) Vytvořit UserDetails pro JWT
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
-                        .password("") // Google user nemá lokální heslo
+                        .password("")
                         .roles(user.getRole().name().replace("ROLE_", ""))
                         .build();
 
-        // 5) Vygenerovat JWT
         String token = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(

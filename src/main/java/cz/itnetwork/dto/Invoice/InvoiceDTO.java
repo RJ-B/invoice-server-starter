@@ -25,6 +25,6 @@ public class InvoiceDTO {
     private PersonReadDTO seller;
     private PersonReadDTO buyer;
 
-    private Boolean hidden;   // ← CHYBĚLO
+    private Boolean hidden;
 
 }
