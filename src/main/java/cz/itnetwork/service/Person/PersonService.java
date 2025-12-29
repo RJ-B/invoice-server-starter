@@ -78,4 +78,7 @@ public interface PersonService {
      * @return seznam statistických dat o osobách
      */
     List<PersonStatisticsDTO> getPersonStatistics();
+
+    List<PersonDTO> searchByName(String query);
+
 }

@@ -144,4 +144,23 @@ public class PersonController {
     public List<PersonStatisticsDTO> getPersonStatistics() {
         return personService.getPersonStatistics();
     }
+
+    /**
+     * Našeptávání osob podle názvu (autocomplete).
+     *
+     * Slouží pro rychlé vyhledávání osob při filtrování faktur.
+     *
+     * @param query část názvu osoby
+     * @return seznam odpovídajících osob
+     */
+    @GetMapping("/search")
+    public List<PersonDTO> searchPersons(@RequestParam String query) {
+
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        return personService.searchByName(query.trim());
+    }
+
 }

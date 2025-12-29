@@ -21,18 +21,16 @@ public interface InvoiceService {
      *
      * Jednotlivé filtry mohou být null, v takovém případě jsou ignorovány.
      *
-     * @param buyerId  identifikátor kupujícího (volitelný filtr)
-     * @param sellerId identifikátor prodávajícího (volitelný filtr)
-     * @param product  název nebo část názvu produktu (volitelný filtr)
-     * @param minPrice minimální cena faktury (volitelný filtr)
-     * @param maxPrice maximální cena faktury (volitelný filtr)
-     * @param limit    maximální počet vrácených faktur (volitelné omezení)
+     * @param buyerName  jméno kupujícího nebo jeho část (volitelný filtr)
+     * @param sellerName jméno prodávajícího nebo jeho část (volitelný filtr)
+     * @param minPrice   minimální cena faktury (volitelný filtr)
+     * @param maxPrice   maximální cena faktury (volitelný filtr)
+     * @param limit      maximální počet vrácených faktur (volitelné omezení)
      * @return seznam faktur odpovídajících zadaným kritériím
      */
     List<InvoiceDTO> getAll(
-            String buyerId,
-            String sellerId,
-            String product,
+            String buyerName,
+            String sellerName,
             Double minPrice,
             Double maxPrice,
             Integer limit

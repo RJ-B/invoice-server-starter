@@ -3,8 +3,10 @@ package cz.itnetwork.entity.repository;
 import cz.itnetwork.entity.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository rozhraní zodpovědné za přístup k datům entity Person.
@@ -16,6 +18,8 @@ import java.util.List;
  * Podporuje logické mazání osob pomocí příznaku hidden.
  */
 public interface PersonRepository extends JpaRepository<Person, Integer> {
+
+    Optional<Person> findFirstByNameIgnoreCaseContaining(String name);
 
     /**
      * Načtení všech aktivních (viditelných) osob.
@@ -69,4 +73,14 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
         ORDER BY revenue DESC
         """)
     List<Object[]> getPersonStatisticsRaw();
+
+    @Query("""
+    SELECT p
+    FROM Person p
+    WHERE (p.hidden = false OR p.hidden IS NULL)
+      AND LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))
+    ORDER BY p.name
+""")
+    List<Person> searchByName(@Param("query") String query);
+
 }

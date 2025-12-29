@@ -7,37 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-/**
- * Repository rozhraní zodpovědné za přístup k datům entity Invoice.
- *
- * Využívá Spring Data JPA pro základní CRUD operace a
- * JpaSpecificationExecutor pro dynamické filtrování.
- *
- * Repository neobsahuje aplikační ani validační logiku,
- * slouží výhradně k práci s perzistentními daty.
- */
 public interface InvoiceRepository
         extends JpaRepository<Invoice, Integer>, JpaSpecificationExecutor<Invoice> {
 
-    /**
-     * Vyhledání všech faktur podle identifikačního čísla prodávajícího.
-     *
-     * @param identificationNumber identifikační číslo (IČO) prodávajícího
-     * @return seznam faktur, kde je daná osoba v roli prodávajícího
-     */
     List<Invoice> findBySeller_IdentificationNumber(String identificationNumber);
 
-    /**
-     * Vyhledání všech faktur podle identifikačního čísla kupujícího.
-     *
-     * @param identificationNumber identifikační číslo (IČO) kupujícího
-     * @return seznam faktur, kde je daná osoba v roli kupujícího
-     */
     List<Invoice> findByBuyer_IdentificationNumber(String identificationNumber);
 
-    /**
-     * Získání měsíčního obratu faktur ve formě agregovaných dat.
-     */
     @Query(value = """
         SELECT TO_CHAR(issued, 'YYYY-MM') AS month,
                SUM(price) AS turnover
@@ -51,9 +27,6 @@ public interface InvoiceRepository
             nativeQuery = true)
     List<Object[]> getMonthlyTurnoverRaw(Integer sellerId, Integer buyerId);
 
-    /**
-     * Získání základních statistických údajů o fakturách.
-     */
     @Query(value = """
         SELECT
             COALESCE(SUM(CASE
@@ -68,19 +41,12 @@ public interface InvoiceRepository
     List<Object[]> getInvoiceStatisticsRaw();
 
     /**
-     * Filtrování faktur podle zadaných kritérií.
+     * Filtrování faktur podle jmen kupujícího a prodávajícího.
      *
      * Optimalizovaný JPQL dotaz:
      * - filtrování probíhá v databázi
-     * - seller a buyer jsou načteni pomocí JOIN FETCH
+     * - buyer a seller jsou načteni pomocí JOIN FETCH
      * - eliminuje N+1 SELECT problém
-     *
-     * @param buyerId  identifikátor kupujícího (volitelný filtr)
-     * @param sellerId identifikátor prodávajícího (volitelný filtr)
-     * @param product  část názvu produktu (volitelný filtr)
-     * @param minPrice minimální cena faktury (volitelný filtr)
-     * @param maxPrice maximální cena faktury (volitelný filtr)
-     * @return seznam faktur odpovídajících zadaným kritériím
      */
     @Query("""
     SELECT i
@@ -90,20 +56,15 @@ public interface InvoiceRepository
     WHERE (i.hidden = false OR i.hidden IS NULL)
       AND (:buyerId IS NULL OR i.buyer.id = :buyerId)
       AND (:sellerId IS NULL OR i.seller.id = :sellerId)
-      AND (
-           :product IS NULL
-           OR i.product LIKE CONCAT('%', CAST(:product AS string), '%')
-      )
       AND (:minPrice IS NULL OR i.price >= :minPrice)
       AND (:maxPrice IS NULL OR i.price <= :maxPrice)
     ORDER BY i.issued DESC
 """)
-
     List<Invoice> filterInvoices(
             Integer buyerId,
             Integer sellerId,
-            String product,
             Double minPrice,
             Double maxPrice
     );
+
 }

@@ -183,4 +183,15 @@ public class PersonServiceImpl implements PersonService {
                 )
                 .toList();
     }
+
+    @Override
+    public List<PersonDTO> searchByName(String query) {
+        return personRepository.searchByName(query)
+                .stream()
+                .limit(10)
+                .map(personMapper::toDto)
+                .toList();
+    }
+
+
 }
